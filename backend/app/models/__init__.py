@@ -17,6 +17,7 @@ from app.models.case import Case
 from app.models.case_details import CaseDetails
 from app.models.case_event import CaseEvent
 from app.models.case_outcome import CaseOutcome
+from app.models.reddit_post import RedditPost
 
 __all__ = [
     "School",
@@ -30,4 +31,5 @@ __all__ = [
     "CaseDetails",
     "CaseEvent",
     "CaseOutcome",
+    "RedditPost",
 ]

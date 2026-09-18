@@ -64,6 +64,24 @@ a raw 500.
 Not built yet (later phases): user accounts, AI features, deeper UI
 polish (Phase 5).
 
+**Data collection — `fetch_reddit_posts.py`**
+- Scrapes academic-integrity-related subreddits (default:
+  r/AcademicIntegrity, r/college, r/professors) via their public `.json`
+  listing endpoints — no Reddit API app/OAuth credentials needed
+- Stores results in a separate `reddit_posts` table (`RedditPost` model),
+  not the `cases` table — a scraped post has no real school/workflow/
+  allegation type to satisfy those required foreign keys
+- Upserts on Reddit's post id, so re-running it is safe
+
+Run it with the backend's venv active:
+```bash
+python fetch_reddit_posts.py
+python fetch_reddit_posts.py --subreddits AcademicIntegrity,college --listing new --limit 50
+```
+Reddit blocks requests without a descriptive `User-Agent` — set
+`REDDIT_USER_AGENT` in `.env` (see `.env.example`) to something
+identifying, e.g. `CaseNext/0.1 (by /u/yourusername)`.
+
 ## Project structure
 
 ```
@@ -77,6 +95,7 @@ backend/
   migrations/            # Flask-Migrate / Alembic migration history
   seed.py                # Populates sample schools/cases for local dev
   run.py                 # App entry point
+  fetch_reddit_posts.py  # Scrapes academic-integrity subreddits into reddit_posts
   requirements.txt
   .env.example           # Copy to .env and fill in DB credentials
 
@@ -164,13 +183,17 @@ Visit the URL Vite prints (typically `http://localhost:5173`).
 8. Sending a bad foreign key (e.g. a `workflow_id` from a different
    school) or a malformed date returns a 400 with a JSON `error` message,
    not a stack trace.
-9. With both servers running: Case Setup creates a case and redirects to
-   My Case; the workflow steps render and "Start first step" /
-   "Mark current step complete" advances through them; the case details
-   form saves and shows "Saved."; Timeline lets you add an event and see
-   it in the list; Case Database lists cases and its school/status
-   filters narrow the list; Resources shows offices and links once a
-   school is selected (auto-selected if you have a case).
+9. `python fetch_reddit_posts.py --subreddits AcademicIntegrity --limit 5`
+   fetches and upserts rows into `reddit_posts`; running it again doesn't
+   create duplicates (check `SELECT count(*) FROM reddit_posts;` stays
+   the same, but `fetched_at` updates).
+10. With both servers running: Case Setup creates a case and redirects to
+    My Case; the workflow steps render and "Start first step" /
+    "Mark current step complete" advances through them; the case details
+    form saves and shows "Saved."; Timeline lets you add an event and see
+    it in the list; Case Database lists cases and its school/status
+    filters narrow the list; Resources shows offices and links once a
+    school is selected (auto-selected if you have a case).
 
 ## Roadmap
 
