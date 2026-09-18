@@ -31,3 +31,15 @@ class CaseEvent(db.Model):
 
     def __repr__(self):
         return f"<CaseEvent {self.title} on {self.event_date}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "case_id": self.case_id,
+            "event_type": self.event_type,
+            "title": self.title,
+            "description": self.description,
+            "event_date": self.event_date.isoformat() if self.event_date else None,
+            "source": self.source,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }

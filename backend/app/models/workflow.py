@@ -28,3 +28,14 @@ class Workflow(db.Model):
 
     def __repr__(self):
         return f"<Workflow {self.name}>"
+
+    def to_dict(self, include_steps=False):
+        data = {
+            "id": self.id,
+            "school_id": self.school_id,
+            "name": self.name,
+            "description": self.description,
+        }
+        if include_steps:
+            data["steps"] = [step.to_dict() for step in self.steps]
+        return data

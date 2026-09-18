@@ -27,3 +27,15 @@ class WorkflowStep(db.Model):
 
     def __repr__(self):
         return f"<WorkflowStep {self.order}: {self.name}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "workflow_id": self.workflow_id,
+            "name": self.name,
+            "description": self.description,
+            "order": self.order,
+            "actor": self.actor,
+            "entry_conditions": self.entry_conditions,
+            "exit_conditions": self.exit_conditions,
+        }

@@ -24,3 +24,12 @@ class AllegationType(db.Model):
 
     def __repr__(self):
         return f"<AllegationType {self.name}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "school_id": self.school_id,
+            "name": self.name,
+            "description": self.description,
+            "category": self.category,
+        }

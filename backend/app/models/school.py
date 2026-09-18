@@ -41,3 +41,12 @@ class School(db.Model):
 
     def __repr__(self):
         return f"<School {self.name}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "domain": self.domain,
+            "state": self.state,
+            "country": self.country,
+        }

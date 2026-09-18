@@ -23,3 +23,13 @@ class CaseOutcome(db.Model):
 
     def __repr__(self):
         return f"<CaseOutcome {self.outcome_type}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "case_id": self.case_id,
+            "outcome_type": self.outcome_type,
+            "description": self.description,
+            "official": self.official,
+            "date": self.date.isoformat() if self.date else None,
+        }

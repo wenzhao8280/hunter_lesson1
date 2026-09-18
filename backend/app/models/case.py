@@ -54,3 +54,41 @@ class Case(db.Model):
 
     def __repr__(self):
         return f"<Case {self.id} status={self.status}>"
+
+    def to_dict(self, include_relations=False, include_summary=False):
+        data = {
+            "id": self.id,
+            "school_id": self.school_id,
+            "workflow_id": self.workflow_id,
+            "current_step_id": self.current_step_id,
+            "allegation_type_id": self.allegation_type_id,
+            "status": self.status,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+        if include_summary:
+            # Names only, for list views (e.g. Case Database) that don't
+            # need the full nested workflow/events/outcomes payload.
+            data["school_name"] = self.school.name if self.school else None
+            data["workflow_name"] = self.workflow.name if self.workflow else None
+            data["current_step_name"] = (
+                self.current_step.name if self.current_step else None
+            )
+            data["allegation_type_name"] = (
+                self.allegation_type.name if self.allegation_type else None
+            )
+        if include_relations:
+            data["school"] = self.school.to_dict() if self.school else None
+            data["workflow"] = (
+                self.workflow.to_dict(include_steps=True) if self.workflow else None
+            )
+            data["current_step"] = (
+                self.current_step.to_dict() if self.current_step else None
+            )
+            data["allegation_type"] = (
+                self.allegation_type.to_dict() if self.allegation_type else None
+            )
+            data["details"] = self.details.to_dict() if self.details else None
+            data["events"] = [event.to_dict() for event in self.events]
+            data["outcomes"] = [outcome.to_dict() for outcome in self.outcomes]
+        return data

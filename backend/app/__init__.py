@@ -24,7 +24,9 @@ def create_app(config_class=Config):
     with app.app_context():
         from app import models  # noqa: F401
 
-    # Blueprints (REST routes) are registered here starting in Phase 2.
+    from app.routes import register_routes
+
+    register_routes(app)
 
     @app.route("/api/health")
     def health_check():

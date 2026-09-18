@@ -26,3 +26,20 @@ class CaseDetails(db.Model):
 
     def __repr__(self):
         return f"<CaseDetails for case {self.case_id}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "case_id": self.case_id,
+            "course_name": self.course_name,
+            "course_code": self.course_code,
+            "incident_date": (
+                self.incident_date.isoformat() if self.incident_date else None
+            ),
+            "notice_date": (
+                self.notice_date.isoformat() if self.notice_date else None
+            ),
+            "student_description": self.student_description,
+            "has_evidence": self.has_evidence,
+            "notes": self.notes,
+        }

@@ -22,3 +22,12 @@ class Terminology(db.Model):
 
     def __repr__(self):
         return f"<Terminology {self.term}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "school_id": self.school_id,
+            "term": self.term,
+            "category": self.category,
+            "definition": self.definition,
+        }

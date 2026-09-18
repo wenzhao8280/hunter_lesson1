@@ -14,9 +14,11 @@ actual terms and steps are stored and shown as-is. A lightweight shared
 
 This repo is being built incrementally. See below for what's done so far.
 
-## Status: Phase 1 — Backend foundation
+## Status: Phase 2 — REST API
 
-Done in this phase:
+Done so far:
+
+**Phase 1 — Backend foundation**
 - Flask app (application factory pattern) connected to PostgreSQL via
   Flask-SQLAlchemy
 - Database schema for all 11 core entities (schools, offices, terminology,
@@ -28,8 +30,26 @@ Done in this phase:
   different terminology and workflow steps, to prove the schema doesn't
   assume a universal process
 
-Not built yet (later phases): REST API endpoints, React frontend, AI
-features.
+**Phase 2 — REST API**
+- `GET /api/schools`, `GET /api/schools/<id>`
+- `GET /api/schools/<id>/offices`
+- `GET /api/schools/<id>/terminology`
+- `GET /api/schools/<id>/workflows` (each workflow includes its ordered
+  steps)
+- `GET /api/schools/<id>/allegation-types`
+- `GET /api/schools/<id>/resources`
+- `POST /api/cases`, `GET /api/cases` (filter with `?school_id=` /
+  `?status=`), `GET /api/cases/<id>`, `PATCH /api/cases/<id>`
+- `PUT /api/cases/<id>/details`
+- `GET /api/cases/<id>/events`, `POST /api/cases/<id>/events`
+- `GET /api/cases/<id>/outcomes`, `POST /api/cases/<id>/outcomes`
+
+All write endpoints validate required fields, that foreign keys exist and
+belong to the right school/workflow, and that dates are valid ISO 8601 —
+returning a JSON `{"error": "..."}` body with a 400/404 status rather than
+a raw 500.
+
+Not built yet (later phases): React frontend, AI features.
 
 ## Project structure
 
@@ -77,7 +97,7 @@ flask run
 
 Visit `http://127.0.0.1:5000/api/health` — it should return `{"status": "ok"}`.
 
-## What to test after Phase 1
+## What to test
 
 1. `flask db upgrade` runs without errors and creates 11 tables plus
    `alembic_version` (check with `psql -d casenext_dev -c "\dt"`).
@@ -97,11 +117,22 @@ Visit `http://127.0.0.1:5000/api/health` — it should return `{"status": "ok"}`
    shared workflow.
 4. `flask run` starts without errors and `GET /api/health` returns
    `{"status": "ok"}`.
+5. `GET /api/schools` returns the two seeded schools, and
+   `GET /api/schools/1/workflows` returns that school's steps in order.
+6. `POST /api/cases` with a valid `school_id`/`workflow_id`/
+   `allegation_type_id` creates a case; `GET /api/cases/<id>` returns it
+   with nested school/workflow/allegation_type/details/events/outcomes.
+7. `PUT /api/cases/<id>/details`, `POST /api/cases/<id>/events`, and
+   `POST /api/cases/<id>/outcomes` each add data that then shows up on
+   `GET /api/cases/<id>`.
+8. Sending a bad foreign key (e.g. a `workflow_id` from a different
+   school) or a malformed date returns a 400 with a JSON `error` message,
+   not a stack trace.
 
 ## Roadmap
 
-- **Phase 2** — REST APIs for schools, workflows, allegations, cases,
-  events, outcomes
+- ~~**Phase 2** — REST APIs for schools, workflows, allegations, cases,
+  events, outcomes~~ done
 - **Phase 3** — React (Vite) frontend: Landing, Case Setup, My Case,
   Timeline, Case Database, Resources pages
 - **Phase 4** — Connect frontend to backend, test full user flow

@@ -25,3 +25,15 @@ class Office(db.Model):
 
     def __repr__(self):
         return f"<Office {self.name}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "school_id": self.school_id,
+            "name": self.name,
+            "type": self.type,
+            "description": self.description,
+            "website": self.website,
+            "contact_email": self.contact_email,
+            "contact_phone": self.contact_phone,
+        }
