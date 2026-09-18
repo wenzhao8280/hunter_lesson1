@@ -14,7 +14,7 @@ actual terms and steps are stored and shown as-is. A lightweight shared
 
 This repo is being built incrementally. See below for what's done so far.
 
-## Status: Phase 2 — REST API
+## Status: Phase 3 — Frontend connected to the backend
 
 Done so far:
 
@@ -49,7 +49,20 @@ belong to the right school/workflow, and that dates are valid ISO 8601 —
 returning a JSON `{"error": "..."}` body with a 400/404 status rather than
 a raw 500.
 
-Not built yet (later phases): React frontend, AI features.
+**Phase 3 — React (Vite) frontend**
+- Six pages, wired to the live API: Landing, Case Setup, My Case (status +
+  workflow progress + details form), Timeline (add/view events), Case
+  Database (browse/filter other cases), Resources (a school's offices and
+  links)
+- No login system yet — "my case" is just the id of the case Case Setup
+  last created, remembered in the browser's `localStorage`
+- End-to-end tested against the real backend with a headless-browser
+  script (create a case, advance its workflow step, save details, add a
+  timeline event, browse the case database, view resources) — see
+  `frontend/README.md`
+
+Not built yet (later phases): user accounts, AI features, deeper UI
+polish (Phase 5).
 
 ## Project structure
 
@@ -60,12 +73,21 @@ backend/
     config.py           # Configuration (reads DATABASE_URL etc. from .env)
     extensions.py        # Shared db/migrate instances
     models/              # One file per database table
-    routes/               # REST API endpoints (Phase 2)
+    routes/               # REST API endpoints
   migrations/            # Flask-Migrate / Alembic migration history
   seed.py                # Populates sample schools/cases for local dev
   run.py                 # App entry point
   requirements.txt
   .env.example           # Copy to .env and fill in DB credentials
+
+frontend/
+  src/
+    api.js                # Fetch wrapper for the backend REST API
+    context/               # "My case" id, remembered via localStorage
+    components/            # NavBar, StepProgress, status banners
+    pages/                  # Landing, CaseSetup, MyCase, Timeline,
+                            # CaseDatabase, Resources
+  .env.example            # Copy to .env; sets VITE_API_BASE_URL
 ```
 
 ## Running the backend locally
@@ -96,6 +118,20 @@ flask run
 ```
 
 Visit `http://127.0.0.1:5000/api/health` — it should return `{"status": "ok"}`.
+
+## Running the frontend locally
+
+Requirements: Node.js 18+, and the backend running (above).
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+# edit .env if your backend isn't on the default http://127.0.0.1:5000/api
+npm run dev
+```
+
+Visit the URL Vite prints (typically `http://localhost:5173`).
 
 ## What to test
 
@@ -128,12 +164,21 @@ Visit `http://127.0.0.1:5000/api/health` — it should return `{"status": "ok"}`
 8. Sending a bad foreign key (e.g. a `workflow_id` from a different
    school) or a malformed date returns a 400 with a JSON `error` message,
    not a stack trace.
+9. With both servers running: Case Setup creates a case and redirects to
+   My Case; the workflow steps render and "Start first step" /
+   "Mark current step complete" advances through them; the case details
+   form saves and shows "Saved."; Timeline lets you add an event and see
+   it in the list; Case Database lists cases and its school/status
+   filters narrow the list; Resources shows offices and links once a
+   school is selected (auto-selected if you have a case).
 
 ## Roadmap
 
 - ~~**Phase 2** — REST APIs for schools, workflows, allegations, cases,
   events, outcomes~~ done
-- **Phase 3** — React (Vite) frontend: Landing, Case Setup, My Case,
-  Timeline, Case Database, Resources pages
-- **Phase 4** — Connect frontend to backend, test full user flow
-- **Phase 5** — UI polish, validation, error handling
+- ~~**Phase 3** — React (Vite) frontend: Landing, Case Setup, My Case,
+  Timeline, Case Database, Resources pages, connected to the backend and
+  tested end-to-end~~ done
+- **Phase 4** — User accounts (cases currently aren't tied to a real
+  user — "my case" is just remembered locally)
+- **Phase 5** — UI polish, AI features
